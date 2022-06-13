@@ -2,6 +2,15 @@
 <html>
     <head>
         <script type="text/javascript" src="env.js"></script>            
-        <script type="text/javascript" src="main.js"></script>            
+        <script type="text/javascript">
+            'use strict';
+
+            function init() {
+                console.log(`Enviornment: ${env.environment}`);
+            }
+
+            document.addEventListener("DOMContentLoaded", init);
+
+        </script>            
     </head>
 </html>
