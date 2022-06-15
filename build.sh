@@ -15,6 +15,7 @@ fi
 
 rm -r build
 mkdir -p build
-cp -r api build
+declare -a dirs=("api" "auth")
+for d in "${dirs[@]}"; do cp -r "$d" build; done
 
 cp env/$env/env.js build
