@@ -15,6 +15,6 @@ fi
 
 rm -r build
 mkdir -p build
-cp *.html build
+cp -r api build
 
 cp env/$env/env.js build
