@@ -5,13 +5,40 @@
         <script type="text/javascript">
             'use strict';
 
-            function init() {
+            //TODO: Fix async issue - maybe import as module?
+            async function test() {
                 console.log(`Enviornment: ${env.environment}`);
                 //TODO: SANITIZE INPUTS!
                 console.log(`URL params: ${window.location.search}`);
+                console.log(`URL params: ${window.location.search}`);
+                const nonce = await generateNonce(); 
+                const encoded = base64URLEncode(await sha256(nonce)); 
+                console.log("nonce", nonce); 
+                console.log("encoded", encoded); 
             }
 
-            document.addEventListener("DOMContentLoaded", init);
+            document.addEventListener("DOMContentLoaded", test);
+
+            const sha256 = async (str) => { 
+                return await crypto.subtle.digest("SHA-256", new TextEncoder().encode(str)); 
+            };
+
+            //TODO: FROM HERE
+
+            const generateNonce = async () => { 
+                const hash = await sha256( 
+                    crypto.getRandomValues(new Uint32Array(4)).toString() 
+                ); 
+                const hashArray = Array.from(new Uint8Array(hash)); 
+                return hashArray.map((b) => b.toString(16).padStart(2, "0")).join(""); 
+            }; 
+  
+            const base64URLEncode = (string) => { 
+            return btoa(String.fromCharCode.apply(null, new Uint8Array(string))) 
+                .replace(/\+/g, "-") 
+                .replace(/\//g, "_") 
+                .replace(/=+$/, ""); 
+            }; 
 
         </script>            
     </head>
