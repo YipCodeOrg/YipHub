@@ -5,39 +5,42 @@
         <script type="text/javascript">
             'use strict';
 
-            //TODO: Fix async issue - maybe import as module?
             async function test() {
                 console.log(`Enviornment: ${env.environment}`);
                 //TODO: SANITIZE INPUTS!
                 console.log(`URL params: ${window.location.search}`);
-                console.log(`URL params: ${window.location.search}`);
-                const nonce = await generateNonce(); 
-                const encoded = base64URLEncode(await sha256(nonce)); 
-                console.log("nonce", nonce); 
-                console.log("encoded", encoded); 
+                const nonce = await generateRandomHexString(); 
+                const base64UrlEncodedHash = base64URLEncode(await sha256(nonce)); 
+                console.log("Nonce:", nonce); 
+                console.log("Base64 URL encoded hash:", base64UrlEncodedHash); 
             }
 
             document.addEventListener("DOMContentLoaded", test);
 
             const sha256 = async (str) => { 
-                return await crypto.subtle.digest("SHA-256", new TextEncoder().encode(str)); 
+                const encoded = new TextEncoder().encode(str)
+                return await crypto.subtle.digest("SHA-256", encoded); 
             };
 
-            //TODO: FROM HERE
-
-            const generateNonce = async () => { 
-                const hash = await sha256( 
-                    crypto.getRandomValues(new Uint32Array(4)).toString() 
-                ); 
-                const hashArray = Array.from(new Uint8Array(hash)); 
-                return hashArray.map((b) => b.toString(16).padStart(2, "0")).join(""); 
+            const generateRandomHexString = async () => { 
+                const seedVals = crypto.getRandomValues(new Uint32Array(4))
+                const seedString = seedVals.toString()
+                const hashBuffer = await sha256(seedString); 
+                const bufferCopyByteArray = new Uint8Array(hashBuffer)
+                const untypedByteArray = Array.from(bufferCopyByteArray); 
+                const hexPairsArray = untypedByteArray.map((b) => b.toString(16).padStart(2, "0"))
+                const randomString = hexPairsArray.join("")
+                return randomString; 
             }; 
   
-            const base64URLEncode = (string) => { 
-            return btoa(String.fromCharCode.apply(null, new Uint8Array(string))) 
-                .replace(/\+/g, "-") 
-                .replace(/\//g, "_") 
-                .replace(/=+$/, ""); 
+            const base64URLEncode = (arrayBuffer) => { 
+                const byteArray = new Uint8Array(arrayBuffer)
+                const binaryByteString = String.fromCharCode(...byteArray)
+                const asciiBase64String = btoa(binaryByteString)
+                return asciiBase64String
+                    .replace(/\+/g, "-") 
+                    .replace(/\//g, "_") 
+                    .replace(/=+$/, ""); 
             }; 
 
         </script>            
