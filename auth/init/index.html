@@ -16,14 +16,18 @@
 
             const action = sanitizedUrlParams.action
 
+            const callbackUrl = `${env.selfOrigin}/auth/handle/index.html`
+
             async function test() {
-                console.log(`Self-origin: ${env.selfOrigin}`);
+                console.log(`Callback URL: ${callbackUrl}`);
                 console.log(`Enviornment: ${env.environment}`);
                 console.log(`Action: ${action}`);
                 const nonce = await generateRandomHexString(); 
                 const base64UrlEncodedHash = base64URLEncode(await sha256(nonce)); 
                 console.log("Nonce:", nonce); 
-                console.log("Base64 URL encoded hash:", base64UrlEncodedHash); 
+                console.log("Base64 URL encoded hash:", base64UrlEncodedHash);
+                console.log("Initialising PKCE workflow...");
+                //TODO: Redirect to Cognito, passing in the given callback URL
             }
 
             document.addEventListener("DOMContentLoaded", test);
