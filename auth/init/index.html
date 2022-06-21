@@ -5,10 +5,20 @@
         <script type="text/javascript">
             'use strict';
 
+            const sanitizedUrlParams = new Proxy(new URLSearchParams(window.location.search), {
+                get(searchParams, prop){
+                    if (prop === "action") {
+                        return searchParams.get("action") == 'signup' ? 'signup' : 'login'
+                    }
+                    throw "Failed to process unrecognised URL parameter"
+                }
+            });
+
+            const action = sanitizedUrlParams.action
+
             async function test() {
                 console.log(`Enviornment: ${env.environment}`);
-                //TODO: SANITIZE INPUTS!
-                console.log(`URL params: ${window.location.search}`);
+                console.log(`Action: ${action}`);
                 const nonce = await generateRandomHexString(); 
                 const base64UrlEncodedHash = base64URLEncode(await sha256(nonce)); 
                 console.log("Nonce:", nonce); 
