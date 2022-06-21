@@ -16,10 +16,14 @@
 
             const action = sanitizedUrlParams.action
 
-            const callbackUrl = `${env.selfOrigin}/auth/handle/index.html`
+            const callbackUrlEncoded = encodeURIComponent(`${env.selfOrigin}/auth/handle/index.html`)
+
+            //TODO: Figure out better way to integrate with Cognito rather than hardcoding URL - ensure vulnerabilities are considered
+            const loginUrl = `https://dev-yipcode-auth.auth.us-east-1.amazoncognito.com/login?client_id=6q5ace1mao2cgnvt0ko89puio5&response_type=code&scope=openid&redirect_uri=${callbackUrlEncoded}`
+            const signupUrl = `https://dev-yipcode-auth.auth.us-east-1.amazoncognito.com/signup?client_id=6q5ace1mao2cgnvt0ko89puio5&response_type=code&scope=openid&redirect_uri=${callbackUrlEncoded}`
 
             async function test() {
-                console.log(`Callback URL: ${callbackUrl}`);
+                console.log(`Callback URL: ${callbackUrlEncoded}`);
                 console.log(`Enviornment: ${env.environment}`);
                 console.log(`Action: ${action}`);
                 const nonce = await generateRandomHexString(); 
@@ -27,7 +31,7 @@
                 console.log("Nonce:", nonce); 
                 console.log("Base64 URL encoded hash:", base64UrlEncodedHash);
                 console.log("Initialising PKCE workflow...");
-                //TODO: Redirect to Cognito, passing in the given callback URL
+                window.location = action === 'login' ? loginUrl : signupUrl
             }
 
             document.addEventListener("DOMContentLoaded", test);

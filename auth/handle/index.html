@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <script type="text/javascript" src="../../env.js"></script>            
+        <script type="text/javascript">
+            'use strict';
+
+            const sanitizedUrlParams = new Proxy(new URLSearchParams(window.location.search), {
+                get(searchParams, prop){
+                    //TODO: Handle URL params sent back by Cognito e.g. state & code: if (prop === "action") {
+                    //     return searchParams.get("action") == 'signup' ? 'signup' : 'login'
+                    // }
+                    throw "Failed to process unrecognised URL parameter"
+                }
+            });
+
+            //TODO: Store URL params in consts similar to this: const action = sanitizedUrlParams.action            
+
+            async function test() {
+                console.log(`Hello from Hub-handle! Enviornment: ${env.environment}`);
+            }
+
+            document.addEventListener("DOMContentLoaded", test);
+
+        </script>            
+    </head>
+</html>
