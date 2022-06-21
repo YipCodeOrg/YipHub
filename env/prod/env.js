@@ -1,3 +1,4 @@
 env = {
-    environment: "prod"
+    environment: "prod",
+    selfOrigin: "https://hub.yipcode.com"
 }
