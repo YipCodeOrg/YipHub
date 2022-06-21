@@ -7,17 +7,58 @@
 
             const sanitizedUrlParams = new Proxy(new URLSearchParams(window.location.search), {
                 get(searchParams, prop){
-                    //TODO: Handle URL params sent back by Cognito e.g. state & code: if (prop === "action") {
-                    //     return searchParams.get("action") == 'signup' ? 'signup' : 'login'
-                    // }
+                    if (prop === "code") {
+                        return encodeURIComponent(searchParams.get("code"))
+                    }
+                    //TODO: Add state param
                     throw "Failed to process unrecognised URL parameter"
                 }
             });
 
-            //TODO: Store URL params in consts similar to this: const action = sanitizedUrlParams.action            
+            const code = sanitizedUrlParams.code
+            const encodedSelfUrl = encodeURIComponent(window.location.protocol + '//' + window.location.host + window.location.pathname)
+
+            const tokenUrl = `${env.cognitoOrigin}/oauth2/token`
 
             async function test() {
                 console.log(`Hello from Hub-handle! Enviornment: ${env.environment}`);
+                console.log(`Self-URL: ${encodedSelfUrl}`);                
+                let responseBody = await exchangeCodeForTokens()
+                //TODO: Use object destructuring here to get entire body, not just token
+                console.log(`Response token: ${responseBody.access_token}`)
+                    //
+                    // ({
+                    //     access_token,
+                    //     refresh_token,
+                    //     id_token,
+                    //     error,
+                    // }) => Object.entries({
+                    //     access_token,
+                    //     refresh_token,
+                    //     id_token,
+                    //     error,
+                    // }).forEach(([k, v]) => console.log(`${k}: ${v}`))
+                //)
+            }
+
+            async function exchangeCodeForTokens()
+            {
+                return fetch
+                (
+                    tokenUrl, 
+                    {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/x-www-form-urlencoded',
+                        },
+                        body: Object.entries({
+                            "grant_type": "authorization_code",
+                            "client_id": env.cognitoClientId,
+                            "code": code,
+                            "redirect_uri": encodedSelfUrl,
+                        }).map(([k, v]) => `${k}=${v}`).join("&"),
+                    }
+                ).then(res => res.json())
             }
 
             document.addEventListener("DOMContentLoaded", test);
