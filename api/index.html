@@ -5,11 +5,29 @@
         <script type="text/javascript">
             'use strict';
 
-            function init() {
-                console.log(`Enviornment: ${env.environment}`);
-            }
+            //TODO: Add some frame-breaking code to ensure this is only embedded in yipFrontOrigin page
 
             document.addEventListener("DOMContentLoaded", init);
+            window.addEventListener("message", handleFrontMessage);
+            
+            const yipFrontOrigin = env.yipFrontOrigin
+
+            function init(){
+                console.log("Posting message from Hub...")
+                postFrontMessage("Hello Top!")
+                console.log("...Hub finished posting message")
+            }
+
+            function handleFrontMessage(msgEvent) {
+                if(msgEvent.origin != yipFrontOrigin){
+                    throw "Origin mismatch. Will not process message."
+                }
+                console.log(msgEvent);
+            }
+
+            function postFrontMessage(msg){
+                window.top.postMessage(msg, yipFrontOrigin)
+            }
 
         </script>            
     </head>
