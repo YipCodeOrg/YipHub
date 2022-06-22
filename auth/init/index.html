@@ -18,16 +18,21 @@
 
             const action = sanitizedUrlParams.action
 
-            const callbackUrlEncoded = encodeURIComponent(`${env.selfOrigin}/auth/handle/index.html`)
-            
-            const callCognitoUrl = `${env.cognitoOrigin}/${action}?client_id=${env.cognitoClientId}&response_type=code&scope=openid&redirect_uri=${callbackUrlEncoded}`
+            const callbackUrlEncoded = encodeURIComponent(`${env.selfOrigin}/auth/handle/index.html`)                        
 
             async function initiatePkceFlow() {
-                // const nonce = await generateRandomHexString(); 
-                // const base64UrlEncodedHash = base64URLEncode(await sha256(nonce)); 
+                const codeChallenge = await generateVerifierReturnChallenge()
+                const callCognitoUrl = `${env.cognitoOrigin}/${action}?client_id=${env.cognitoClientId}&response_type=code&scope=openid&redirect_uri=${callbackUrlEncoded}&code_challenge_method=S256&code_challenge=${codeChallenge}`
                 console.log("Redirecting to Cognito...");
                 window.location = callCognitoUrl
             }
+
+            async function generateVerifierReturnChallenge(){
+                const code_verifier = await generateRandomHexString()
+                sessionStorage.setItem("code_verifier", code_verifier)
+                return base64URLEncode(await sha256(code_verifier))                 
+            }  
+
             const sha256 = async (str) => { 
                 const encoded = new TextEncoder().encode(str)
                 return await crypto.subtle.digest("SHA-256", encoded); 
