@@ -29,6 +29,10 @@
             }
 
             async function exchangeCodeForTokens(){
+                
+                let code_verifier = sessionStorage.getItem("code_verifier")
+                sessionStorage.removeItem("code_verifier")
+                
                 const {
                     access_token,
                     refresh_token,
@@ -47,6 +51,7 @@
                             "client_id": env.cognitoClientId,
                             "code": code,
                             "redirect_uri": encodedSelfUrl,
+                            "code_verifier": code_verifier,
                         }).map(([k, v]) => `${k}=${v}`).join("&"),
                     }
                 ).then(res => res.json())
