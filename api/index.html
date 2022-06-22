@@ -13,9 +13,15 @@
             const yipFrontOrigin = env.yipFrontOrigin
 
             function init(){
-                console.log("Posting message from Hub...")
-                postFrontMessage("Hello Top!")
-                console.log("...Hub finished posting message")
+                postLoginStatus()
+            }
+
+            function postLoginStatus(){
+                console.log("Posting login status from Hub...")
+                const isLoggedIn = !!localStorage.getItem("access_token")
+                const status = isLoggedIn ? "userIsLoggedIn" : "userNotLoggedIn"
+                postFrontMessage(status)
+                console.log("...Hub finished posting login status")
             }
 
             function handleFrontMessage(msgEvent) {
