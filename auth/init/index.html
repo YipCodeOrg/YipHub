@@ -21,8 +21,12 @@
             const callbackUrlEncoded = encodeURIComponent(`${env.selfOrigin}/auth/handle/index.html`)                        
 
             async function initiatePkceFlow() {
-                const code_challenge = await generateVerifierReturnChallenge()
-                const callCognitoUrl = `${env.cognitoOrigin}/${action}?client_id=${env.cognitoClientId}&response_type=code&scope=openid&redirect_uri=${callbackUrlEncoded}&code_challenge_method=S256&code_challenge=${code_challenge}`
+                const code_challenge_promise = generateVerifierReturnChallenge()
+                const state_promise = generateRandomHexString()
+                const code_challenge = await code_challenge_promise
+                const state = await state_promise
+                sessionStorage.setItem("state", state)
+                const callCognitoUrl = `${env.cognitoOrigin}/${action}?client_id=${env.cognitoClientId}&response_type=code&scope=openid&redirect_uri=${callbackUrlEncoded}&code_challenge_method=S256&code_challenge=${code_challenge}&state=${state}`
                 console.log("Redirecting to Cognito...");
                 window.location = callCognitoUrl
             }

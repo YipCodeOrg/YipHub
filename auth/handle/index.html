@@ -5,32 +5,51 @@
         <script type="text/javascript">
             'use strict';
 
-            document.addEventListener("DOMContentLoaded", completePkceFlow);
+            document.addEventListener("DOMContentLoaded", handleCodeResponse);
 
             const sanitizedUrlParams = new Proxy(new URLSearchParams(window.location.search), {
                 get(searchParams, prop){
                     if (prop === "code") {
                         return encodeURIComponent(searchParams.get("code"))
                     }
-                    //TODO: Add state param
+                    if (prop === "state") {
+                        const state = searchParams.get("state")
+                        const validationRegex=/^([0-9a-f]{64})$/i;
+                        if(validationRegex.test(state)){
+                            return state
+                        }
+                        throw "State parameter failed validation regex. Should be 64 digit hex number."
+                    }
                     throw "Failed to process unrecognised URL parameter"
                 }
             });
 
-            const code = sanitizedUrlParams.code
             const encodedSelfUrl = encodeURIComponent(window.location.protocol + '//' + window.location.host + window.location.pathname)
-
             const tokenUrl = `${env.cognitoOrigin}/oauth2/token`
 
-            async function completePkceFlow() {
-                console.log("Exchanging code for tokens...");
-                await exchangeCodeForTokens()
-                console.log("...Code exchanged for tokens");            
+            async function handleCodeResponse() {
+                if(isStateValid()){
+                    console.log("Exchanging code for tokens...");
+                    await exchangeCodeForTokens()
+                    console.log("...Code exchanged for tokens");
+                } else{
+                    throw "Invalid state"
+                }
+                sessionStorage.removeItem("state")                           
+            }
+
+            function isStateValid(){
+                const receivedState = sanitizedUrlParams.state
+                const storedState = sessionStorage.getItem("state")
+                if(!storedState || !receivedState || storedState != receivedState){
+                    return false
+                }
+                return true
             }
 
             async function exchangeCodeForTokens(){
                 
-                let code_verifier = sessionStorage.getItem("code_verifier")
+                const code_verifier = sessionStorage.getItem("code_verifier")
                 sessionStorage.removeItem("code_verifier")
                 
                 const {
@@ -49,7 +68,7 @@
                         body: Object.entries({
                             "grant_type": "authorization_code",
                             "client_id": env.cognitoClientId,
-                            "code": code,
+                            "code": sanitizedUrlParams.code,
                             "redirect_uri": encodedSelfUrl,
                             "code_verifier": code_verifier,
                         }).map(([k, v]) => `${k}=${v}`).join("&"),
