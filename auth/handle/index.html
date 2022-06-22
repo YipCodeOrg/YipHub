@@ -22,28 +22,20 @@
 
             async function test() {
                 console.log(`Hello from Hub-handle! Enviornment: ${env.environment}`);
-                console.log(`Self-URL: ${encodedSelfUrl}`);                
-                let responseBody = await exchangeCodeForTokens()
-                //TODO: Use object destructuring here to get entire body, not just token
-                console.log(`Response token: ${responseBody.access_token}`)
-                    //
-                    // ({
-                    //     access_token,
-                    //     refresh_token,
-                    //     id_token,
-                    //     error,
-                    // }) => Object.entries({
-                    //     access_token,
-                    //     refresh_token,
-                    //     id_token,
-                    //     error,
-                    // }).forEach(([k, v]) => console.log(`${k}: ${v}`))
-                //)
+                console.log(`Self-URL: ${encodedSelfUrl}`);
+                console.log("Exchanging code for tokens...");
+                await exchangeCodeForTokens()
+                console.log("...Code exchanged for tokens");            
             }
 
             async function exchangeCodeForTokens()
             {
-                return fetch
+                const {
+                    access_token,
+                    refresh_token,
+                    id_token,
+                    error,
+                } = await fetch
                 (
                     tokenUrl, 
                     {
@@ -59,6 +51,14 @@
                         }).map(([k, v]) => `${k}=${v}`).join("&"),
                     }
                 ).then(res => res.json())
+
+                if(error){
+                    throw new Error(error)
+                }
+
+                localStorage.setItem("access_token", access_token)
+                localStorage.setItem("refresh_token", refresh_token)
+                localStorage.setItem("id_token", id_token)
             }
 
             document.addEventListener("DOMContentLoaded", test);
