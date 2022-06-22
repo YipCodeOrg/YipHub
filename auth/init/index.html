@@ -5,6 +5,8 @@
         <script type="text/javascript">
             'use strict';
 
+            document.addEventListener("DOMContentLoaded", initiatePkceFlow);
+
             const sanitizedUrlParams = new Proxy(new URLSearchParams(window.location.search), {
                 get(searchParams, prop){
                     if (prop === "action") {
@@ -20,20 +22,12 @@
             
             const callCognitoUrl = `${env.cognitoOrigin}/${action}?client_id=${env.cognitoClientId}&response_type=code&scope=openid&redirect_uri=${callbackUrlEncoded}`
 
-            async function test() {
-                console.log(`Callback URL: ${callbackUrlEncoded}`);
-                console.log(`Enviornment: ${env.environment}`);
-                console.log(`Action: ${action}`);
-                const nonce = await generateRandomHexString(); 
-                const base64UrlEncodedHash = base64URLEncode(await sha256(nonce)); 
-                console.log("Nonce:", nonce); 
-                console.log("Base64 URL encoded hash:", base64UrlEncodedHash);
+            async function initiatePkceFlow() {
+                // const nonce = await generateRandomHexString(); 
+                // const base64UrlEncodedHash = base64URLEncode(await sha256(nonce)); 
                 console.log("Redirecting to Cognito...");
                 window.location = callCognitoUrl
             }
-
-            document.addEventListener("DOMContentLoaded", test);
-
             const sha256 = async (str) => { 
                 const encoded = new TextEncoder().encode(str)
                 return await crypto.subtle.digest("SHA-256", encoded); 

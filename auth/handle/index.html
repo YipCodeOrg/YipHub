@@ -5,6 +5,8 @@
         <script type="text/javascript">
             'use strict';
 
+            document.addEventListener("DOMContentLoaded", completePkceFlow);
+
             const sanitizedUrlParams = new Proxy(new URLSearchParams(window.location.search), {
                 get(searchParams, prop){
                     if (prop === "code") {
@@ -20,9 +22,7 @@
 
             const tokenUrl = `${env.cognitoOrigin}/oauth2/token`
 
-            async function test() {
-                console.log(`Hello from Hub-handle! Enviornment: ${env.environment}`);
-                console.log(`Self-URL: ${encodedSelfUrl}`);
+            async function completePkceFlow() {
                 console.log("Exchanging code for tokens...");
                 await exchangeCodeForTokens()
                 console.log("...Code exchanged for tokens");            
@@ -60,8 +60,6 @@
                 localStorage.setItem("refresh_token", refresh_token)
                 localStorage.setItem("id_token", id_token)
             }
-
-            document.addEventListener("DOMContentLoaded", test);
 
         </script>            
     </head>
