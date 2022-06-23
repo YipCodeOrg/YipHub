@@ -14,7 +14,6 @@
 
             function init(){
                 postReadyToListen()
-                postLoginStatus()
             }
 
             //////////////////////////////// POST
@@ -43,8 +42,19 @@
                 if(msgEvent.origin != yipFrontOrigin){
                     throw "Origin mismatch. Will not process message."
                 }
-                //TODO: Use switch statement & only process safelist match for data
-                console.log("Received message from Front: " + msgEvent.data);
+                const data = msgEvent.data;
+                let postHandleMsg = "Processed message from Front: ";
+                switch (data) {
+                    case "requestLoginStatus":
+                        postHandleMsg += "Login status requested";
+                        postLoginStatus()
+                        break;
+                    default:
+                        const errorMsg = "Unhandled message data received from Front";
+                        postHandleMsg += `ERROR ${errorMsg}`;
+                        throw new Error(errorMsg);
+                }
+                console.log(postHandleMsg);
             }
 
         </script>            
