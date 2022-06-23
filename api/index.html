@@ -13,7 +13,16 @@
             const yipFrontOrigin = env.yipFrontOrigin
 
             function init(){
+                postReadyToListen()
                 postLoginStatus()
+            }
+
+            //////////////////////////////// POST
+
+            function postReadyToListen(){
+                console.log("Hub ready to listen. Posting status...")
+                postFrontMessage("readyToListen")
+                console.log("...Posted status: Hub ready to listen.")
             }
 
             function postLoginStatus(){
@@ -24,15 +33,18 @@
                 console.log("...Hub finished posting login status")
             }
 
-            function handleFrontMessage(msgEvent) {
+            function postFrontMessage(msg){
+                window.top.postMessage(msg, yipFrontOrigin)
+            }
+            
+            //////////////////////////////// HANDLE
+
+            function handleFrontMessage(msgEvent) {                
                 if(msgEvent.origin != yipFrontOrigin){
                     throw "Origin mismatch. Will not process message."
                 }
-                console.log(msgEvent);
-            }
-
-            function postFrontMessage(msg){
-                window.top.postMessage(msg, yipFrontOrigin)
+                //TODO: Use switch statement & only process safelist match for data
+                console.log("Received message from Front: " + msgEvent.data);
             }
 
         </script>            
