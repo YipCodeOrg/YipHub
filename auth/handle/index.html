@@ -36,11 +36,14 @@
             const encodedSelfUrl = encodeURIComponent(window.location.protocol + '//' + window.location.host + window.location.pathname)
             const tokenUrl = `${env.cognitoOrigin}/oauth2/token`
 
+            const yipFrontOrigin = env.yipFrontOrigin
+
             async function handleCodeResponse() {
                 if(isStateValid()){
                     console.log("Exchanging code for tokens...");
                     await exchangeCodeForTokens()
                     console.log("...Code exchanged for tokens");
+                    window.location.replace(`${yipFrontOrigin}/app`)
                 } else{
                     throw "Invalid state"
                 }
