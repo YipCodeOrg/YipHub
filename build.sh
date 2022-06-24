@@ -19,7 +19,7 @@ build_target_dir=build/$env
 echo "Building into directory: ${build_target_dir}"
 
 echo "Replacing content..."
-rm -r $build_target_dir
+rm -fr $build_target_dir
 mkdir -p $build_target_dir
 declare -a dirs=("api" "auth")
 for d in "${dirs[@]}"; do cp -r "$d" $build_target_dir; done
