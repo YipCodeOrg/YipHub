@@ -1,16 +1,23 @@
 <!DOCTYPE html>
 <html>
     <head>
+        <style id="frameBreaker">
+            body{display:none !important;}
+        </style>
         <script type="text/javascript" src="../env.js"></script>            
         <script type="text/javascript">
             'use strict';
 
-            //TODO: Add some frame-breaking code to ensure this is only embedded in yipFrontOrigin page
-
-            document.addEventListener("DOMContentLoaded", init);
-            window.addEventListener("message", handleFrontMessage);
-            
             const yipFrontOrigin = env.yipFrontOrigin
+
+            if (window != top && window.parent === top) {
+                var frameBreaker = document.getElementById("frameBreaker");
+                frameBreaker.parentNode.removeChild(frameBreaker);
+                document.addEventListener("DOMContentLoaded", init);
+                window.addEventListener("message", handleFrontMessage);
+            } else {
+                throw new Error("Invalid framing context detected.")
+            }
 
             function init(){
                 postReadyToListen()
