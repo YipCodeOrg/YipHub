@@ -14,14 +14,16 @@ if ! [[ $env =~ ^dev|prod|local ]]; then
     exit 1
 fi
 
-echo "Building env: ${env}"
+build_target_dir=build/$env
+
+echo "Building into directory: ${build_target_dir}"
 echo "Replacing content..."
 
-rm -r build
-mkdir -p build
+rm -r $build_target_dir
+mkdir -p $build_target_dir
 declare -a dirs=("api" "auth")
-for d in "${dirs[@]}"; do cp -r "$d" build; done
-cp env/$env/env.js favicon.ico build
+for d in "${dirs[@]}"; do cp -r "$d" $build_target_dir; done
+cp env/$env/env.js favicon.ico $build_target_dir
 
 echo "...Replaced content"
 
@@ -43,7 +45,7 @@ if grep -q "$cognito_user_pool_name" <<< $user_pool_info; then
     if grep -q "$StandardClient" <<< $client_info; then
         client_id=$(aws cognito-idp list-user-pool-clients --user-pool-id $user_pool_id --profile $aws_profile --max-items 1 | grep -Po '(?<="ClientId": ")(.+)(?=")')
         echo "Found client ID: ${client_id}"
-        sed -i -e "s/COGNITO_CLIENT_ID_PLACEHOLDER/${client_id}/g" build/env.js
+        sed -i -e "s/COGNITO_CLIENT_ID_PLACEHOLDER/${client_id}/g" $build_target_dir/env.js
     else
         echo "Error: standard client not found"
         exit 1
