@@ -1,5 +1,6 @@
 env = {
+    apiGatewayOrigin: "https://api.yipcode.com",
     environment: "prod",
-    selfOrigin: "https://hub.yipcode.com",
-    cognitoClientId: "COGNITO_CLIENT_ID_PLACEHOLDER"
+    cognitoClientId: "COGNITO_CLIENT_ID_PLACEHOLDER",
+    selfOrigin: "https://hub.yipcode.com"
 }
