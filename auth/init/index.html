@@ -4,7 +4,8 @@
         <style id="frameBreaker">
             body{display:none !important;}
         </style>
-        <script type="text/javascript" src="../../env.js"></script>            
+        <script type="text/javascript" src="../../env.js"></script>   
+        <script type="text/javascript" src="../../common/common.js"></script>                    
         <script type="text/javascript">
             'use strict';
 
@@ -18,24 +19,38 @@
 
             const sanitizedUrlParams = new Proxy(new URLSearchParams(window.location.search), {
                 get(searchParams, prop){
-                    if (prop === "action") {
-                        return searchParams.get("action") == 'signup' ? 'signup' : 'login'
-                    }
-                    throw "Failed to process unrecognised URL parameter"
+                    switch(prop){
+                        case "action":
+                            return searchParams.get("action") == 'signup' ? 'signup' : 'login'
+                        case "postLoginRedirect":
+                            const rawUnsafe = searchParams.get("postLoginRedirect")
+                            if (validFrontRedirects.includes(rawUnsafe)) {
+                                return rawUnsafe
+                            }
+                            throw new Error(`Invalid redirect given: ${rawUnsafe}`)
+                        default:
+                            throw new Error("Failed to process unrecognised URL parameter")
+                    }                    
                 }
             });
 
-            const action = sanitizedUrlParams.action
+            function setPostLoginRedirect(r){        
+                sessionStorage.setItem("postLoginRedirect", r)
+            }
 
             const callbackUrlEncoded = encodeURIComponent(`${env.selfOrigin}/auth/handle/index.html`)                        
 
             async function initiatePkceFlow() {
+                const action = sanitizedUrlParams.action
                 const code_challenge_promise = generateVerifierReturnChallenge()
                 const state_promise = generateRandomHexString()
                 const code_challenge = await code_challenge_promise
                 const state = await state_promise
                 sessionStorage.setItem("state", state)
                 const callCognitoUrl = `${env.cognitoOrigin}/${action}?client_id=${env.cognitoClientId}&response_type=code&scope=openid&redirect_uri=${callbackUrlEncoded}&code_challenge_method=S256&code_challenge=${code_challenge}&state=${state}`
+                const postLoginRedirect = sanitizedUrlParams.postLoginRedirect
+                console.log(`Remembering post-login redirect: ${postLoginRedirect}`)
+                setPostLoginRedirect(postLoginRedirect)
                 console.log("Redirecting to Cognito...");
                 window.location = callCognitoUrl
             }

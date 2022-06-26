@@ -1,0 +1,1 @@
+validFrontRedirects = ["/app", "/app/dashboard", "/app/create"]

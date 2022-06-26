@@ -4,7 +4,8 @@
         <style id="frameBreaker">
             body{display:none !important;}
         </style>
-        <script type="text/javascript" src="../../env.js"></script>            
+        <script type="text/javascript" src="../../env.js"></script>   
+        <script type="text/javascript" src="../../common/common.js"></script>             
         <script type="text/javascript">
             'use strict';
 
@@ -43,7 +44,14 @@
                     console.log("Exchanging code for tokens...");
                     await exchangeCodeForTokens()
                     console.log("...Code exchanged for tokens");
-                    window.location.replace(`${yipFrontOrigin}/app`)
+                    const postLoginRedirect = sessionStorage.getItem("postLoginRedirect") ?? "app"
+                    sessionStorage.removeItem("postLoginRedirect")
+                    if (validFrontRedirects.includes(postLoginRedirect)) {
+                        window.location.replace(yipFrontOrigin + postLoginRedirect)
+                    }
+                    else{
+                        throw new Error("Invalid redirect found in session storage")
+                    }
                 } else{
                     throw "Invalid state"
                 }
