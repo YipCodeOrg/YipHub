@@ -50,8 +50,9 @@
                     throw "Origin mismatch. Will not process message."
                 }
                 const data = msgEvent.data;
+                const label = data.label
                 let postHandleMsg = "Processed message from Front: ";
-                switch (data) {
+                switch (label) {
                     case "requestLoginStatus":
                         postHandleMsg += "Login status requested";
                         postLoginStatus()
