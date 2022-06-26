@@ -21,7 +21,7 @@ echo "Building into directory: ${build_target_dir}"
 echo "Replacing content..."
 rm -fr $build_target_dir
 mkdir -p $build_target_dir
-declare -a dirs=("api" "auth")
+declare -a dirs=("api" "auth" "logout")
 for d in "${dirs[@]}"; do cp -r "$d" $build_target_dir; done
 cp favicon.ico $build_target_dir
 echo "...Replaced content"

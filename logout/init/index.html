@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <style id="frameBreaker">
+            body{display:none !important;}
+        </style>
+        <script type="text/javascript" src="../../env.js"></script>            
+        <script type="text/javascript">
+            'use strict';
+
+            if (self === top) {
+                var frameBreaker = document.getElementById("frameBreaker");
+                frameBreaker.parentNode.removeChild(frameBreaker);
+                document.addEventListener("DOMContentLoaded", initiateLogout);
+            } else {
+                top.location = self.location;
+            }                       
+
+            async function initiateLogout() {
+                const callCognitoUrl = `${env.cognitoOrigin}/logout`
+                console.log("Redirecting to Cognito...");
+                window.location = callCognitoUrl
+            }
+
+        </script>            
+    </head>
+</html>
