@@ -27,7 +27,7 @@
 
             function postReadyToListen(){
                 console.log("Hub ready to listen. Posting status...")
-                postFrontMessage("readyToListen")
+                postFrontMessage({label: "readyToListen"})
                 console.log("...Posted status: Hub ready to listen.")
             }
 
@@ -35,7 +35,7 @@
                 console.log("Posting login status from Hub...")
                 const isLoggedIn = !!localStorage.getItem("access_token")
                 const status = isLoggedIn ? "userIsLoggedIn" : "userNotLoggedIn"
-                postFrontMessage(status)
+                postFrontMessage({label: status})
                 console.log("...Hub finished posting login status")
             }
 
