@@ -50,6 +50,9 @@
                     throw "Origin mismatch. Will not process message."
                 }
                 const data = msgEvent.data;
+                if(!isValidMessageFromFront(data)){
+                    throw new Error("Unexpected message data format detected. Message will not be processed.")
+                }
                 const label = data.label
                 let postHandleMsg = "Processed message from Front: ";
                 switch (label) {
@@ -63,6 +66,11 @@
                         throw new Error(errorMsg);
                 }
                 console.log(postHandleMsg);
+            }
+
+            function isValidMessageFromFront(unsafeData){
+                const label = unsafeData.label
+                return (typeof label === 'string' || label instanceof String)
             }
 
         </script>            
