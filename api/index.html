@@ -19,18 +19,16 @@
             }
 
             function init(){
-                window.addEventListener("message", handleFrontMessage);                     
+                const fromFrontChannel = new MessageChannel();
+                fromFrontChannel.port1.onmessage = handleFrontMessage                    
                 console.log("Hub ready to listen. Posting status...")
-                window.top.postMessage("readyToListen", yipFrontOrigin)  
+                window.top.postMessage("readyToListen", yipFrontOrigin, [fromFrontChannel.port2])  
                 console.log("...Posted status: Hub ready to listen.")
             }
             
             //////////////////////////////// HANDLE: MAIN
 
-            function handleFrontMessage(msgEvent) {             
-                if(msgEvent.origin != yipFrontOrigin){
-                    throw "Origin mismatch. Will not process message."
-                }
+            function handleFrontMessage(msgEvent) {           
                 const data = msgEvent.data;
                 if(!isValidMessageFromFront(data)){
                     throw new Error("Unexpected message data format detected. Message will not be processed.")
