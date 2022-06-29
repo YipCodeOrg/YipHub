@@ -13,39 +13,21 @@
             if (window != top && window.parent === top) {
                 var frameBreaker = document.getElementById("frameBreaker");
                 frameBreaker.parentNode.removeChild(frameBreaker);
-                document.addEventListener("DOMContentLoaded", init);
-                window.addEventListener("message", handleFrontMessage);
+                document.addEventListener("DOMContentLoaded", init);                
             } else {
                 throw new Error("Invalid framing context detected.")
             }
 
             function init(){
-                postReadyToListen()
-            }
-
-            //////////////////////////////// POST
-
-            function postReadyToListen(){
+                window.addEventListener("message", handleFrontMessage);                     
                 console.log("Hub ready to listen. Posting status...")
-                postFrontMessage({label: "readyToListen"})
+                window.top.postMessage("readyToListen", yipFrontOrigin)  
                 console.log("...Posted status: Hub ready to listen.")
             }
-
-            function postLoginStatus(){
-                console.log("Posting login status from Hub...")
-                const isLoggedIn = !!localStorage.getItem("access_token")
-                const status = isLoggedIn ? "userIsLoggedIn" : "userNotLoggedIn"
-                postFrontMessage({label: status})
-                console.log("...Hub finished posting login status")
-            }
-
-            function postFrontMessage(msg){
-                window.top.postMessage(msg, yipFrontOrigin)
-            }
             
-            //////////////////////////////// HANDLE
+            //////////////////////////////// HANDLE: MAIN
 
-            function handleFrontMessage(msgEvent) {                
+            function handleFrontMessage(msgEvent) {             
                 if(msgEvent.origin != yipFrontOrigin){
                     throw "Origin mismatch. Will not process message."
                 }
@@ -54,23 +36,32 @@
                     throw new Error("Unexpected message data format detected. Message will not be processed.")
                 }
                 const label = data.label
-                let postHandleMsg = "Processed message from Front: ";
+                const responsePort = msgEvent.ports[0]
+                console.log(`Message received from Front. Processing: ${label}...`);
                 switch (label) {
                     case "requestLoginStatus":
-                        postHandleMsg += "Login status requested";
-                        postLoginStatus()
+                        handleLoginRequest(responsePort)
                         break;
                     default:
                         const errorMsg = "Unhandled message data received from Front";
-                        postHandleMsg += `ERROR ${errorMsg}`;
                         throw new Error(errorMsg);
                 }
-                console.log(postHandleMsg);
+                console.log("...finished processing message from Front.");
             }
 
             function isValidMessageFromFront(unsafeData){
                 const label = unsafeData.label
                 return (typeof label === 'string' || label instanceof String)
+            }
+
+            //////////////////////////////// HANDLE: CASES
+
+            function handleLoginRequest(responsePort){
+                console.log("Posting login status from Hub...")
+                const isLoggedIn = !!localStorage.getItem("access_token")
+                const status = isLoggedIn ? "userIsLoggedIn" : "userNotLoggedIn"
+                responsePort.postMessage({label: status})
+                console.log("...Hub finished posting login status")
             }
 
         </script>            
