@@ -30,8 +30,8 @@
 
             function handleFrontMessage(msgEvent) {           
                 const data = msgEvent.data;
-                if(!isValidMessageFromFront(data)){
-                    throw new Error("Unexpected message data format detected. Message will not be processed.")
+                if(!isLabelValid(data)){
+                    throw new Error("Bad message data - invalid or missing label.")
                 }
                 const label = data.label
                 const responsePort = msgEvent.ports[0]
@@ -40,6 +40,11 @@
                     case "requestLoginStatus":
                         handleLoginRequest(responsePort)
                         break;
+                    case "apiRequest":
+                        if(!isValidApiRequest(data)){
+                            throw new Error("Bad message data - invalid API request.")                            
+                        }
+                        handleApiRequest(responsePort, data.payload)
                     default:
                         const errorMsg = "Unhandled message data received from Front";
                         throw new Error(errorMsg);
@@ -47,9 +52,13 @@
                 console.log("...finished processing message from Front.");
             }
 
-            function isValidMessageFromFront(unsafeData){
+            function isLabelValid(unsafeData){
                 const label = unsafeData.label
                 return (typeof label === 'string' || label instanceof String)
+            }
+
+            function isValidApiRequest(unsafeData){
+                //TODO           
             }
 
             //////////////////////////////// HANDLE: CASES
@@ -60,6 +69,12 @@
                 const status = isLoggedIn ? "userIsLoggedIn" : "userNotLoggedIn"
                 responsePort.postMessage({label: status})
                 console.log("...Hub finished posting login status")
+            }
+
+            //////////////////////////////// HANDLE: API-REQUEST
+
+            function handleApiRequest(responsePort, requestPayload){
+                //TODO
             }
 
         </script>            
