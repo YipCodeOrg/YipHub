@@ -40,7 +40,9 @@
             const yipFrontOrigin = env.yipFrontOrigin
 
             async function handleCodeResponse() {
-                if(isStateValid()){
+                const isStateValid = isStateValid()
+                sessionStorage.removeItem("state") 
+                if(isStateValid){
                     console.log("Exchanging code for tokens...");
                     await exchangeCodeForTokens()
                     console.log("...Code exchanged for tokens");
@@ -54,8 +56,7 @@
                     }
                 } else{
                     throw "Invalid state"
-                }
-                sessionStorage.removeItem("state")                           
+                }                         
             }
 
             function isStateValid(){
