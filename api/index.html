@@ -44,7 +44,9 @@
                         if(!isValidApiRequest(data)){
                             throw new Error("Bad message data - invalid API request.")                            
                         }
-                        handleApiRequest(responsePort, data.payload)
+                        const payload = extractApiRequestPayload(data)
+                        handleApiRequest(responsePort, payload)
+                        break;
                     default:
                         const errorMsg = "Unhandled message data received from Front";
                         throw new Error(errorMsg);
@@ -52,16 +54,7 @@
                 console.log("...finished processing message from Front.");
             }
 
-            function isLabelValid(unsafeData){
-                const label = unsafeData.label
-                return (typeof label === 'string' || label instanceof String)
-            }
-
-            function isValidApiRequest(unsafeData){
-                //TODO           
-            }
-
-            //////////////////////////////// HANDLE: CASES
+            //////////////////////////////// HANDLE: LOGIN
 
             function handleLoginRequest(responsePort){
                 console.log("Posting login status from Hub...")
@@ -75,6 +68,83 @@
 
             function handleApiRequest(responsePort, requestPayload){
                 //TODO
+            }
+
+            //////////////////////////////// SANITIZATION
+
+            function isLabelValid(unsafeData){
+                if(!isSimpleProperty(unsafeData, "label")){
+                    return false
+                }
+                const label = unsafeData.label
+                return isString(label)
+            }
+
+            function extractApiRequestPayload(data){
+                const payload = data.payload
+                if(!!payload.body){
+                    return {
+                        method: payload.method,
+                        path: payload.path,
+                        body: payload.body
+                    }
+                }
+                return {
+                        method: payload.method,
+                        path: payload.path,                
+                }
+            }
+
+            function isValidApiRequest(unsafeData){
+                if(!isSimpleProperty(unsafeData, "payload")){
+                    return false
+                }
+                const unsafePaylod = unsafeData.payload
+                let expectedStringProperties = ["method", "path"]
+                const bodyStr = "body"
+                if(isProperty(unsafeData, bodyStr)){
+                    expectedStringProperties.push(bodyStr)
+                }
+                if(!areSimpleProperties(unsafePaylod, expectedStringProperties)){
+                    return false
+                }
+                return areStrings(expectedStringProperties) 
+            }
+
+            function areSimpleProperties(obj, properties){
+                for(const prop of properties){
+                    if(!isSimpleProperty(obj, prop)){
+                        return false
+                    }
+                }
+                return true
+            }
+
+            function isProperty(obj, property){
+                return !!Object.getOwnPropertyDescriptor(obj, property)
+            }
+
+            function isSimpleProperty(obj, property){
+                const desc = Object.getOwnPropertyDescriptor(obj, property)
+                if(!!desc){
+                    if(!desc.get && !desc.set){
+                        return true
+                    }
+                }
+                return false
+            }
+
+            function areStrings(objs){
+                for(const obj of objs){
+                    if(!isString(obj)){
+                        return false
+                    }
+                }
+                return true
+            }
+
+            function isString(obj){
+                return (typeof obj === 'string' || obj instanceof String)
             }
 
         </script>            
