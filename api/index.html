@@ -90,7 +90,8 @@
                 //TODO: Refactor this to do a safelist check on method/path combo & then send off to API-G
                 //Make sure you
                 if(method === getMethod && path === "/yipcodes"){
-                    setTimeout(() => responsePort.postMessage({label: apiResponseLabel, payload:{status: HttpStatusOk, body: ["Yc1, Yc2, Yc3"]}}), 1000)
+                    const mockBody = JSON.stringify({yipCodes: ["Yc1", "Yc2", "Yc3"]})
+                    setTimeout(() => responsePort.postMessage({label: apiResponseLabel, payload:{status: HttpStatusOk, body: mockBody}}), 1000)
                 } else{
                     throw new Error("Unhandled request method/path combination")
                 }                
