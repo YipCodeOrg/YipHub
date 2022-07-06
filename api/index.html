@@ -28,6 +28,9 @@
             
             //////////////////////////////// HANDLE: MAIN
 
+            const loginRequestLabel = "requestLoginStatus"
+            const apiRequestLabel = "apiRequest"
+
             function handleFrontMessage(msgEvent) {           
                 const data = msgEvent.data;
                 if(!isLabelValid(data)){
@@ -37,15 +40,20 @@
                 const responsePort = msgEvent.ports[0]
                 console.log(`Message received from Front. Processing: ${label}...`);
                 switch (label) {
-                    case "requestLoginStatus":
+                    case loginRequestLabel:
                         handleLoginRequest(responsePort)
                         break;
-                    case "apiRequest":
+                    case apiRequestLabel:
                         if(!isValidApiRequest(data)){
                             throw new Error("Bad message data - invalid API request.")                            
                         }
                         const payload = extractApiRequestPayload(data)
-                        handleApiRequest(responsePort, payload)
+                        if(!!payload.body){
+                            handleApiRequestWithBody(responsePort, payload)
+                        }
+                        else{
+                            handleApiRequestWithoutBody(responsePort, payload)
+                        }           
                         break;
                     default:
                         const errorMsg = "Unhandled message data received from Front";
@@ -66,8 +74,26 @@
 
             //////////////////////////////// HANDLE: API-REQUEST
 
-            function handleApiRequest(responsePort, requestPayload){
-                //TODO
+            const HttpStatusOk = BigInt(200)
+            const apiResponseLabel = "apiResponse"
+
+            const getMethod = "GET"
+            const allowedMethods = [getMethod]
+
+            function handleApiRequestWithBody(responsePort, requestPayload){
+                throw new Error("Not Implemented")
+            }
+
+            function handleApiRequestWithoutBody(responsePort, requestPayload){
+                const method = requestPayload.method
+                const path = requestPayload.path
+                //TODO: Refactor this to do a safelist check on method/path combo & then send off to API-G
+                //Make sure you
+                if(method === getMethod && path === "/yipcodes"){
+                    setTimeout(() => responsePort.postMessage({label: apiResponseLabel, payload:{status: HttpStatusOk, body: ["Yc1, Yc2, Yc3"]}}), 1000)
+                } else{
+                    throw new Error("Unhandled request method/path combination")
+                }                
             }
 
             //////////////////////////////// SANITIZATION
@@ -106,9 +132,18 @@
                     expectedStringProperties.push(bodyStr)
                 }
                 if(!areSimpleProperties(unsafePaylod, expectedStringProperties)){
+                    console.log("Invalid API request: some expected simple properties not found")
                     return false
                 }
-                return areStrings(expectedStringProperties) 
+                if(!areStrings(expectedStringProperties)){
+                    console.log("Invalid API request: some properties are not strings")
+                    return false
+                }
+                if(!allowedMethods.includes(unsafePaylod.method)){
+                    console.log("Invalid API request: Invalid method")
+                    return false
+                }
+                return true
             }
 
             function areSimpleProperties(obj, properties){
