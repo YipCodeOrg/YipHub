@@ -4,7 +4,8 @@
         <style id="frameBreaker">
             body{display:none !important;}
         </style>
-        <script type="text/javascript" src="../env.js"></script>            
+        <script type="text/javascript" src="../common/common.js"></script>
+        <script type="text/javascript" src="../env.js"></script>
         <script type="text/javascript">
             'use strict';
 
@@ -74,7 +75,7 @@
 
             //////////////////////////////// HANDLE: API-REQUEST
 
-            const HttpStatusOk = BigInt(200)
+            const HttpStatusOk = 200
             const apiResponseLabel = "apiResponse"
 
             const getMethod = "GET"
@@ -87,14 +88,22 @@
             function handleApiRequestWithoutBody(responsePort, requestPayload){
                 const method = requestPayload.method
                 const path = requestPayload.path
-                //TODO: Refactor this to do a safelist check on method/path combo & then send off to API-G
-                //Make sure you
-                if(method === getMethod && path === "/yipcodes"){
-                    const mockBody = JSON.stringify({yipCodes: ["Yc1", "Yc2", "Yc3"]})
-                    setTimeout(() => responsePort.postMessage({label: apiResponseLabel, payload:{status: HttpStatusOk, body: mockBody}}), 1000)
-                } else{
-                    throw new Error("Unhandled request method/path combination")
-                }                
+
+                const requestUrl = `${env.apiGatewayOrigin}${path}`
+
+                fetch(requestUrl, {
+                    method: method,
+                    headers: {
+                        'Authorization': `Bearer ${getIdToken()}`,
+                    }
+                }).then(res => {
+                    responsePort.postMessage({
+                        label: apiResponseLabel,
+                        payload:{
+                            status: res.status,
+                            body: res.body}
+                    })                    
+                })         
             }
 
             //////////////////////////////// SANITIZATION
