@@ -77,6 +77,7 @@
 
             const HttpStatusOk = 200
             const apiResponseLabel = "apiResponse"
+            const apiResponseErrorLabel = "apiResponseError"
 
             const getMethod = "GET"
             const allowedMethods = [getMethod]
@@ -88,22 +89,31 @@
             function handleApiRequestWithoutBody(responsePort, requestPayload){
                 const method = requestPayload.method
                 const path = requestPayload.path
-
                 const requestUrl = `${env.apiGatewayOrigin}${path}`
+                sendApiRequestAndForwardResponse(requestUrl, method, responsePort)
+            }
 
-                fetch(requestUrl, {
-                    method: method,
-                    headers: {
-                        'Authorization': `Bearer ${getIdToken()}`,
-                    }
-                }).then(res => {
-                    responsePort.postMessage({
-                        label: apiResponseLabel,
-                        payload:{
-                            status: res.status,
-                            body: res.body}
-                    })                    
-                })         
+            async function sendApiRequestAndForwardResponse(requestUrl, method, responsePort){
+                try{
+                    await fetch(requestUrl, {
+                        method: method,
+                        headers: {
+                            'Authorization': `Bearer ${getIdToken()}`,
+                        }
+                    }).then(res => {
+                        responsePort.postMessage({
+                            label: apiResponseLabel,
+                            payload:{
+                                status: res.status,
+                                body: res.body}
+                        },
+                        err => {
+                            responsePort.postMessage({label: apiResponseErrorLabel})
+                        })                    
+                    })
+                } catch(e){
+                    responsePort.postMessage({label: apiResponseErrorLabel})
+                }
             }
 
             //////////////////////////////// SANITIZATION
