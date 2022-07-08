@@ -93,33 +93,30 @@
                 sendApiRequestAndForwardResponse(requestUrl, method, responsePort)
             }
 
-            async function sendApiRequestAndForwardResponse(requestUrl, method, responsePort){
-                try{
-                    const fetchResult = await fetch(requestUrl, {
-                        method: method,
-                        headers: {
-                            'Authorization': `Bearer ${getIdToken()}`,
-                        }
-                    })
-                    const reader = fetchResult.body.getReader()
-                    const content = await reader.read()
-                    const contentValue = content.value
-                    if(!!contentValue){
-                        const status = fetchResult.status                    
+            function sendApiRequestAndForwardResponse(requestUrl, method, responsePort){
+                fetch(requestUrl, {
+                    method: method,
+                    headers: {
+                        'Authorization': `Bearer ${getIdToken()}`,
+                    }
+                })
+                .then(res => res.text().then(text => [res.status, text]))
+                .then(([status, text]) => {
                         responsePort.postMessage({
                             label: apiResponseLabel,
                             payload:{
                                 status: status,
-                                body: contentValue
+                                body: text
                             }
-                        })   
-                    } else{
-                        console.error("Problem getting content from stream")
-                        responsePort.postMessage({label: apiResponseErrorLabel})                        
+                        })
+                    },
+                    reason => {
+                        responsePort.postMessage({label: apiResponseErrorLabel})                            
                     }
-                } catch(e){
+                )
+                .catch(e => {
                     responsePort.postMessage({label: apiResponseErrorLabel})
-                }
+                })
             }
 
             //////////////////////////////// SANITIZATION
