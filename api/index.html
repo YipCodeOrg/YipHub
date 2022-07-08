@@ -103,14 +103,20 @@
                     })
                     const reader = fetchResult.body.getReader()
                     const content = await reader.read()
-                    const status = fetchResult.status                    
-                    responsePort.postMessage({
-                        label: apiResponseLabel,
-                        payload:{
-                            status: status,
-                            body: content
-                        }
-                    })                    
+                    const contentValue = content.value
+                    if(!!contentValue){
+                        const status = fetchResult.status                    
+                        responsePort.postMessage({
+                            label: apiResponseLabel,
+                            payload:{
+                                status: status,
+                                body: contentValue
+                            }
+                        })   
+                    } else{
+                        console.error("Problem getting content from stream")
+                        responsePort.postMessage({label: apiResponseErrorLabel})                        
+                    }
                 } catch(e){
                     responsePort.postMessage({label: apiResponseErrorLabel})
                 }
@@ -152,15 +158,15 @@
                     expectedStringProperties.push(bodyStr)
                 }
                 if(!areSimpleProperties(unsafePaylod, expectedStringProperties)){
-                    console.log("Invalid API request: some expected simple properties not found")
+                    console.error("Invalid API request: some expected simple properties not found")
                     return false
                 }
                 if(!areStrings(expectedStringProperties)){
-                    console.log("Invalid API request: some properties are not strings")
+                    console.error("Invalid API request: some properties are not strings")
                     return false
                 }
                 if(!allowedMethods.includes(unsafePaylod.method)){
-                    console.log("Invalid API request: Invalid method")
+                    console.error("Invalid API request: Invalid method")
                     return false
                 }
                 return true
