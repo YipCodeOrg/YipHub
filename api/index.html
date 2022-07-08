@@ -49,11 +49,19 @@
                 }                
             }
 
+            var frontToHubPort = null
+
             function completeHandshake(permanentPort){
-                console.log("...Hub received command to listen")
-                permanentPort.onmessage = handleFrontMessage
-                console.log("Hub is listening. Posting status...")
-                permanentPort.postMessage("listening")
+                if(!!frontToHubPort){
+                    frontToHubPort.onmessage = null
+                    throw new Error("Attempt to complete handshake but port already exists. Possibly security violation. Detatched listener from existing port.")
+                } else{
+                    frontToHubPort = permanentPort
+                    console.log("...Hub received command to listen")
+                    permanentPort.onmessage = handleFrontMessage
+                    console.log("Hub is listening. Posting status...")
+                    permanentPort.postMessage("listening")
+                }                
             }
 
             function handleFrontMessage(msgEvent) {           
