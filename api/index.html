@@ -14,23 +14,47 @@
             if (window != top && window.parent === top) {
                 var frameBreaker = document.getElementById("frameBreaker");
                 frameBreaker.parentNode.removeChild(frameBreaker);
-                document.addEventListener("DOMContentLoaded", init);                
+                document.addEventListener("DOMContentLoaded", initHandshake);                
             } else {
                 throw new Error("Invalid framing context detected.")
             }
 
-            function init(){
+            function initHandshake(){
                 const fromFrontChannel = new MessageChannel();
-                fromFrontChannel.port1.onmessage = handleFrontMessage                    
+                fromFrontChannel.port1.onmessage = handleHandshakeResponse                
                 console.log("Hub ready to listen. Posting status...")
-                window.top.postMessage("readyToListen", yipFrontOrigin, [fromFrontChannel.port2])  
-                console.log("...Posted status: Hub ready to listen.")
+                window.top.postMessage("readyToListen", yipFrontOrigin, [fromFrontChannel.port2])                  
             }
             
             //////////////////////////////// HANDLE: MAIN
 
             const loginRequestLabel = "requestLoginStatus"
             const apiRequestLabel = "apiRequest"
+
+            const handleHandshakeResponse = (msgEvent) => {
+                const data = msgEvent.data;
+                if(!isLabelValid(data)){
+                    throw new Error("Bad message data - invalid or missing label.")
+                }
+                const label = data.label
+                switch (label) {
+                    case "listen":
+                        const permanentPort = msgEvent.ports[0]
+                        completeHandshake(permanentPort)
+                        break;
+                    case "handshakeError":
+                        throw new Error("Handshake error occurred.")
+                    default:
+                        throw new Error("Unexpected response returned during handshake")                        
+                }                
+            }
+
+            function completeHandshake(permanentPort){
+                console.log("...Hub received command to listen")
+                permanentPort.onmessage = handleFrontMessage
+                console.log("Hub is listening. Posting status...")
+                permanentPort.postMessage("listening")
+            }
 
             function handleFrontMessage(msgEvent) {           
                 const data = msgEvent.data;
