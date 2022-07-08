@@ -95,22 +95,22 @@
 
             async function sendApiRequestAndForwardResponse(requestUrl, method, responsePort){
                 try{
-                    await fetch(requestUrl, {
+                    const fetchResult = await fetch(requestUrl, {
                         method: method,
                         headers: {
                             'Authorization': `Bearer ${getIdToken()}`,
                         }
-                    }).then(res => {
-                        responsePort.postMessage({
-                            label: apiResponseLabel,
-                            payload:{
-                                status: res.status,
-                                body: res.body}
-                        },
-                        err => {
-                            responsePort.postMessage({label: apiResponseErrorLabel})
-                        })                    
                     })
+                    const reader = fetchResult.body.getReader()
+                    const content = await reader.read()
+                    const status = fetchResult.status                    
+                    responsePort.postMessage({
+                        label: apiResponseLabel,
+                        payload:{
+                            status: status,
+                            body: content
+                        }
+                    })                    
                 } catch(e){
                     responsePort.postMessage({label: apiResponseErrorLabel})
                 }
