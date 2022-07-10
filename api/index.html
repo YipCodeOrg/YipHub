@@ -20,16 +20,17 @@
             }
 
             function initHandshake(){
-                const fromFrontChannel = new MessageChannel();
-                fromFrontChannel.port1.onmessage = handleHandshakeResponse                
+                const handshakeChannel = new MessageChannel();
+                handshakeChannel.port1.onmessage = handleHandshakeResponse                
                 console.log("Hub ready to listen. Posting status...")
-                window.top.postMessage("readyToListen", yipFrontOrigin, [fromFrontChannel.port2])                  
+                window.top.postMessage("readyToListen", yipFrontOrigin, [handshakeChannel.port2])                  
             }
             
             //////////////////////////////// HANDLE: MAIN
 
             const loginRequestLabel = "requestLoginStatus"
             const apiRequestLabel = "apiRequest"
+            var isHandshakeError = false
 
             const handleHandshakeResponse = (msgEvent) => {
                 const data = msgEvent.data;
@@ -39,32 +40,38 @@
                 const label = data.label
                 switch (label) {
                     case "listen":
-                        const permanentPort = msgEvent.ports[0]
-                        completeHandshake(permanentPort)
+                        const messagingPort = msgEvent.ports[0]
+                        completeHandshake(messagingPort)
                         break;
                     case "handshakeError":
+                        isHandshakeError = true
                         throw new Error("Handshake error occurred.")
                     default:
                         throw new Error("Unexpected response returned during handshake")                        
                 }                
             }
 
-            var frontToHubPort = null
+            var frontMessagingPort = null
 
-            function completeHandshake(permanentPort){
-                if(!!frontToHubPort){
-                    frontToHubPort.onmessage = null
+            function completeHandshake(messagingPort){
+                if(!!frontMessagingPort || isHandshakeError){
+                    //Remove any previous handler as we can no longer trust the channel
+                    frontMessagingPort.onmessage = null
+                    isHandshakeError = true
                     throw new Error("Attempt to complete handshake but port already exists. Possibly security violation. Detatched listener from existing port.")
                 } else{
-                    frontToHubPort = permanentPort
+                    frontMessagingPort = messagingPort
                     console.log("...Hub received command to listen")
-                    permanentPort.onmessage = handleFrontMessage
+                    messagingPort.onmessage = handleFrontMessage
                     console.log("Hub is listening. Posting status...")
-                    permanentPort.postMessage("listening")
+                    messagingPort.postMessage("listening")
                 }                
             }
 
-            function handleFrontMessage(msgEvent) {           
+            function handleFrontMessage(msgEvent) { 
+                if(isHandshakeError)          {
+                    throw new Error("Handshake error occcurred. Cannot process message.")
+                }
                 const data = msgEvent.data;
                 if(!isLabelValid(data)){
                     throw new Error("Bad message data - invalid or missing label.")
@@ -99,11 +106,56 @@
 
             function handleLoginRequest(responsePort){
                 console.log("Posting login status from Hub...")
-                const isLoggedIn = !!localStorage.getItem("access_token")
+                const isLoggedIn = getIsLoggedIn()
                 const status = isLoggedIn ? "userIsLoggedIn" : "userNotLoggedIn"
                 responsePort.postMessage({label: status})
                 console.log("...Hub finished posting login status")
             }
+
+            function getIsLoggedIn(){
+                const access_token = localStorage.getItem("access_token")
+                //TODO
+                return !!access_token
+            }
+            
+            /*TODO
+            async function exchangeCodeForTokens(){
+                const tokenUrl = `${env.cognitoOrigin}/oauth2/token`
+                
+                const code_verifier = sessionStorage.getItem("code_verifier")
+                sessionStorage.removeItem("code_verifier")
+                
+                const {
+                    id_token,
+                    error,
+                    expires_in
+                } = await fetch
+                (
+                    tokenUrl, 
+                    {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/x-www-form-urlencoded',
+                        },
+                        body: Object.entries({
+                            "grant_type": "authorization_code",
+                            "client_id": env.cognitoClientId,
+                            "code": sanitizedUrlParams.code,
+                            "redirect_uri": encodedSelfUrl,
+                            "code_verifier": code_verifier,
+                        }).map(([k, v]) => `${k}=${v}`).join("&"),
+                    }
+                ).then(res => res.json())
+
+                if(error){
+                    throw new Error(error)
+                }
+
+                //For now, don't need access token. May need it in future. to allow user to update their account settings
+                //localStorage.setItem("access_token", access_token)
+                localStorage.setItem("refresh_token", refresh_token)
+                localStorage.setItem("id_token", id_token)
+            }*/
 
             //////////////////////////////// HANDLE: API-REQUEST
 
