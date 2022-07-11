@@ -73,11 +73,7 @@
                 const code_verifier = sessionStorage.getItem("code_verifier")
                 sessionStorage.removeItem("code_verifier")
                 
-                const {
-                    id_token,
-                    error,
-                    expires_in
-                } = await fetch
+                const result = await fetch
                 (
                     tokenUrl, 
                     {
@@ -94,6 +90,12 @@
                         }).map(([k, v]) => `${k}=${v}`).join("&"),
                     }
                 ).then(res => res.json())
+
+                const {
+                    id_token,
+                    error,
+                    expires_in
+                } = result
 
                 if(error){
                     throw new Error(error)
