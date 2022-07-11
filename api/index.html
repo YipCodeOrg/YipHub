@@ -113,49 +113,13 @@
             }
 
             function getIsLoggedIn(){
-                const access_token = localStorage.getItem("access_token")
-                //TODO
-                return !!access_token
+                const id_token = localStorage.getItem("id_token")
+                const expiry_time = localStorage.getItem("expiry_time")
+                const current_time = Date.now()
+                const threshold = 100000
+                const delta = expiry_time - current_time
+                return !!id_token && (delta > threshold)
             }
-            
-            /*TODO
-            async function exchangeCodeForTokens(){
-                const tokenUrl = `${env.cognitoOrigin}/oauth2/token`
-                
-                const code_verifier = sessionStorage.getItem("code_verifier")
-                sessionStorage.removeItem("code_verifier")
-                
-                const {
-                    id_token,
-                    error,
-                    expires_in
-                } = await fetch
-                (
-                    tokenUrl, 
-                    {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/x-www-form-urlencoded',
-                        },
-                        body: Object.entries({
-                            "grant_type": "authorization_code",
-                            "client_id": env.cognitoClientId,
-                            "code": sanitizedUrlParams.code,
-                            "redirect_uri": encodedSelfUrl,
-                            "code_verifier": code_verifier,
-                        }).map(([k, v]) => `${k}=${v}`).join("&"),
-                    }
-                ).then(res => res.json())
-
-                if(error){
-                    throw new Error(error)
-                }
-
-                //For now, don't need access token. May need it in future. to allow user to update their account settings
-                //localStorage.setItem("access_token", access_token)
-                localStorage.setItem("refresh_token", refresh_token)
-                localStorage.setItem("id_token", id_token)
-            }*/
 
             //////////////////////////////// HANDLE: API-REQUEST
 

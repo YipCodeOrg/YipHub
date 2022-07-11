@@ -35,7 +35,6 @@
             });
 
             const encodedSelfUrl = encodeURIComponent(window.location.protocol + '//' + window.location.host + window.location.pathname)
-            const tokenUrl = `${env.cognitoOrigin}/oauth2/token`
 
             const yipFrontOrigin = env.yipFrontOrigin
 
@@ -69,15 +68,16 @@
             }
 
             async function exchangeCodeForTokens(){
+                const tokenUrl = `${env.cognitoOrigin}/oauth2/token`
                 
                 const code_verifier = sessionStorage.getItem("code_verifier")
                 sessionStorage.removeItem("code_verifier")
                 
                 const {
-                    access_token,
                     refresh_token,
                     id_token,
                     error,
+                    expires_in
                 } = await fetch
                 (
                     tokenUrl, 
@@ -100,10 +100,18 @@
                     throw new Error(error)
                 }
 
-                //For now, don't need access token. May need it in future. to allow user to update their account settings
+                //For now, don't need access/refresh tokens. May need it in future.
                 //localStorage.setItem("access_token", access_token)
-                localStorage.setItem("refresh_token", refresh_token)
+                //localStorage.setItem("refresh_token", refresh_token)
                 localStorage.setItem("id_token", id_token)
+                const expiry_time = calculateExpiry(expires_in)
+                localStorage.setItem("expiry_time", expiry_time)
+            }
+
+            function calculateExpiry(expiresInSeconds){
+                const nowInMilis = Date.now()
+                const expiresInMilis = expiresInSeconds*1000
+                return nowInMilis + expiresInMilis
             }
 
         </script>            
