@@ -117,6 +117,15 @@ const apiResponseLabel = "apiResponse"
 const apiResponseErrorLabel = "apiResponseError"
 
 const getMethod = "GET"
+
+function getIdToken(){
+    const token = localStorage.getItem("id_token")
+    if(!!token){
+        return token
+    }
+    throw new Error("ID token not found")
+}
+
 const allowedMethods = [getMethod]
 
 function handleApiRequestWithBody(responsePort, requestPayload){
