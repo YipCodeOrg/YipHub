@@ -16,14 +16,14 @@ fi
 
 build_target_dir=build/$env
 
-echo "Building into directory: ${build_target_dir}"
-
-echo "Replacing content..."
+echo "Cleaning directory: ${build_target_dir}..."
 rm -fr $build_target_dir
 mkdir -p $build_target_dir
-cp -a "src/." "$build_target_dir/"
-cp favicon.ico $build_target_dir
-echo "...Replaced content"
+echo "...directory cleaned."
+
+echo "Running TS build..."
+npx tsc --outDir ${build_target_dir}/modules
+echo "...TS build complete"
 
 echo "Copying env file..."
 env_file=env/$env/env.js
@@ -37,7 +37,11 @@ fi
 cp $env_file $build_target_dir
 echo "...Env file copied"
 
-echo "Is env cached: ${is_env_cached}"
+echo "Copying other non-TS files..."
+cp -a "html/." "$build_target_dir/"
+cp favicon.ico $build_target_dir
+echo "...Other non-TS files copied"
+
 if [ $is_env_cached == false ]; then
     echo "No locally cached file found. Reading details from AWS."
     aws_profile='default'

@@ -1,0 +1,9 @@
+{
+  "license": "UNLICENSED",
+  "devDependencies": {
+    "typescript": "^4.7.4"
+  },
+  "scripts": {
+    "build-local": "./build.sh local"
+  }
+}
