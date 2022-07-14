@@ -1,4 +1,7 @@
 import { validFrontRedirects } from "../authCommon.js"
+import { envType } from "../../envType.js";
+import { setWindowLocation } from "../../common/common.js";
+declare var env:envType
 
 if (self === top) {
     var frameBreaker = document.getElementById("frameBreaker");
@@ -8,22 +11,23 @@ if (self === top) {
     top.location = self.location;
 }
 
-const sanitizedUrlParams = new Proxy(new URLSearchParams(window.location.search), {
-    get(searchParams, prop){
-        switch(prop){
-            case "action":
-                return searchParams.get("action") == 'signup' ? 'signup' : 'login'
-            case "postLoginRedirect":
-                const rawUnsafe = searchParams.get("postLoginRedirect")
-                if (validFrontRedirects.includes(rawUnsafe)) {
-                    return rawUnsafe
-                }
-                throw new Error(`Invalid redirect given: ${rawUnsafe}`)
-            default:
-                throw new Error("Failed to process unrecognised URL parameter")
-        }                    
+class AuthInitUrlParams {
+    constructor(private readonly searchParams: URLSearchParams) {}
+
+    action(this: AuthInitUrlParams): string {
+        return this.searchParams.get("action") == 'signup' ? 'signup' : 'login'
     }
-});
+
+    postLoginRedirect(this: AuthInitUrlParams) : string{
+        const rawUnsafe = this.searchParams.get("postLoginRedirect")
+        if (validFrontRedirects.includes(rawUnsafe)) {
+            return rawUnsafe
+        }
+        throw new Error(`Invalid redirect given: ${rawUnsafe}`)
+    }
+}
+
+const sanitizedUrlParams = new AuthInitUrlParams(new URLSearchParams(window.location.search))
 
 function setPostLoginRedirect(r){        
     sessionStorage.setItem("postLoginRedirect", r)
@@ -43,7 +47,7 @@ async function initiatePkceFlow() {
     console.log(`Remembering post-login redirect: ${postLoginRedirect}`)
     setPostLoginRedirect(postLoginRedirect)
     console.log("Redirecting to Cognito...");
-    window.location = callCognitoUrl
+    setWindowLocation(callCognitoUrl)
 }
 
 async function generateVerifierReturnChallenge(){

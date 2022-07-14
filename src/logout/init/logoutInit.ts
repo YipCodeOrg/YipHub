@@ -1,3 +1,7 @@
+import { setWindowLocation } from "../../common/common.js";
+import { envType } from "../../envType.js";
+declare var env:envType
+
 if (self === top) {
     var frameBreaker = document.getElementById("frameBreaker");
     frameBreaker.parentNode.removeChild(frameBreaker);
@@ -11,5 +15,5 @@ const logoutCallbackUrlEncoded = encodeURIComponent(`${env.selfOrigin}/logout/ha
 async function initiateLogout() {
     const callCognitoUrl = `${env.cognitoOrigin}/logout?client_id=${env.cognitoClientId}&logout_uri=${logoutCallbackUrlEncoded}`
     console.log("Redirecting to Cognito...");
-    window.location = callCognitoUrl
+    setWindowLocation(callCognitoUrl)
 }

@@ -1,4 +1,6 @@
 import { validFrontRedirects } from "../authCommon.js"
+import { envType } from "../../envType.js";
+declare var env:envType
 
 if (self === top) {
     var frameBreaker = document.getElementById("frameBreaker");
@@ -8,22 +10,24 @@ if (self === top) {
     top.location = self.location;
 }
 
-const sanitizedUrlParams = new Proxy(new URLSearchParams(window.location.search), {
-    get(searchParams, prop){
-        if (prop === "code") {
-            return encodeURIComponent(searchParams.get("code"))
+class AuthHandleUrlParams {
+    constructor(private readonly searchParams: URLSearchParams) {}
+
+    state(this: AuthHandleUrlParams): string {
+        const state = this.searchParams.get("state")
+        const validationRegex=/^([0-9a-f]{64})$/i;
+        if(validationRegex.test(state)){
+            return state
         }
-        if (prop === "state") {
-            const state = searchParams.get("state")
-            const validationRegex=/^([0-9a-f]{64})$/i;
-            if(validationRegex.test(state)){
-                return state
-            }
-            throw "State parameter failed validation regex. Should be 64 digit hex number."
-        }
-        throw "Failed to process unrecognised URL parameter"
+        throw "State parameter failed validation regex. Should be 64 digit hex number."
     }
-});
+
+    code(this: AuthHandleUrlParams) : string{
+        return encodeURIComponent(this.searchParams.get("code"))
+    }
+}
+
+const sanitizedUrlParams: AuthHandleUrlParams = new AuthHandleUrlParams(new URLSearchParams(window.location.search))
 
 const encodedSelfUrl = encodeURIComponent(window.location.protocol + '//' + window.location.host + window.location.pathname)
 
@@ -50,7 +54,7 @@ async function handleCodeResponse() {
 }
 
 function isStateValid(){
-    const receivedState = sanitizedUrlParams.state
+    const receivedState = sanitizedUrlParams.state()
     const storedState = sessionStorage.getItem("state")
     if(!storedState || !receivedState || storedState != receivedState){
         return false
@@ -98,7 +102,7 @@ async function exchangeCodeForTokens(){
     //localStorage.setItem("refresh_token", refresh_token)
     localStorage.setItem("id_token", id_token)
     const expiry_time = calculateExpiry(expires_in)
-    localStorage.setItem("expiry_time", expiry_time)
+    localStorage.setItem("expiry_time", expiry_time.toString())
 }
 
 function calculateExpiry(expiresInSeconds){

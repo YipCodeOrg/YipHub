@@ -1,4 +1,4 @@
-import { envType } from "../envType";
+import { envType } from "../envType.js";
 
 declare var env:envType
 

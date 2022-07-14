@@ -1,3 +1,7 @@
+import { setWindowLocation } from "../../common/common.js";
+import { envType } from "../../envType.js";
+declare var env:envType
+
 if (self === top) {
     var frameBreaker = document.getElementById("frameBreaker");
     frameBreaker.parentNode.removeChild(frameBreaker);
@@ -17,5 +21,5 @@ async function handleLogoutResponse() {
     localStorage.removeItem("expiry_time")
     console.log("...Tokens removed")
     console.log("Redirecting to homepage...")
-    window.location = yipFrontOrigin
+    setWindowLocation(yipFrontOrigin)
 }
