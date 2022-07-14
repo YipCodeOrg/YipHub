@@ -43,7 +43,7 @@ async function initiatePkceFlow() {
     const state = await state_promise
     sessionStorage.setItem("state", state)
     const callCognitoUrl = `${env.cognitoOrigin}/${action}?client_id=${env.cognitoClientId}&response_type=code&scope=openid&redirect_uri=${callbackUrlEncoded}&code_challenge_method=S256&code_challenge=${code_challenge}&state=${state}`
-    const postLoginRedirect = sanitizedUrlParams.postLoginRedirect
+    const postLoginRedirect = sanitizedUrlParams.postLoginRedirect()
     console.log(`Remembering post-login redirect: ${postLoginRedirect}`)
     setPostLoginRedirect(postLoginRedirect)
     console.log("Redirecting to Cognito...");
