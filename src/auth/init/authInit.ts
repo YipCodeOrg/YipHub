@@ -36,7 +36,7 @@ function setPostLoginRedirect(r){
 const callbackUrlEncoded = encodeURIComponent(`${env.selfOrigin}/auth/handle/index.html`)                        
 
 async function initiatePkceFlow() {
-    const action = sanitizedUrlParams.action
+    const action = sanitizedUrlParams.action()
     const code_challenge_promise = generateVerifierReturnChallenge()
     const state_promise = generateRandomHexString()
     const code_challenge = await code_challenge_promise

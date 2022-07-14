@@ -79,7 +79,7 @@ async function exchangeCodeForTokens(){
             body: Object.entries({
                 "grant_type": "authorization_code",
                 "client_id": env.cognitoClientId,
-                "code": sanitizedUrlParams.code,
+                "code": sanitizedUrlParams.code(),
                 "redirect_uri": encodedSelfUrl,
                 "code_verifier": code_verifier,
             }).map(([k, v]) => `${k}=${v}`).join("&"),
