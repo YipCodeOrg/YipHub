@@ -1,3 +1,7 @@
+import { envType } from "../envType";
+
+declare var env:envType
+
 if (window != top && window.parent === top) {
     var frameBreaker = document.getElementById("frameBreaker");
     frameBreaker.parentNode.removeChild(frameBreaker);
@@ -6,9 +10,8 @@ if (window != top && window.parent === top) {
     throw new Error("Invalid framing context detected.")
 }
 
-const yipFrontOrigin = env.yipFrontOrigin
-
 function initHandshake(){
+    const yipFrontOrigin = env.yipFrontOrigin
     const handshakeChannel = new MessageChannel();
     handshakeChannel.port1.onmessage = handleHandshakeResponse                
     console.log("Hub ready to listen. Posting status...")
@@ -103,7 +106,7 @@ function handleLoginRequest(responsePort){
 
 function getIsLoggedIn(){
     const id_token = localStorage.getItem("id_token")
-    const expiry_time = localStorage.getItem("expiry_time")
+    const expiry_time = Number(localStorage.getItem("expiry_time"))
     const current_time = Date.now()
     const threshold = 100000
     const delta = expiry_time - current_time
