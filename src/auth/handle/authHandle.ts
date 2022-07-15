@@ -4,9 +4,11 @@ declare var env:envType
 
 if (self === top) {
     var frameBreaker = document.getElementById("frameBreaker");
-    frameBreaker.parentNode.removeChild(frameBreaker);
-    document.addEventListener("DOMContentLoaded", handleCodeResponse);
-} else {
+    if(!!frameBreaker?.parentNode){
+        frameBreaker.parentNode.removeChild(frameBreaker);
+        document.addEventListener("DOMContentLoaded", handleCodeResponse);
+    }
+} else if(!!top){
     top.location = self.location;
 }
 
@@ -16,14 +18,18 @@ class AuthHandleUrlParams {
     state(this: AuthHandleUrlParams): string {
         const state = this.searchParams.get("state")
         const validationRegex=/^([0-9a-f]{64})$/i;
-        if(validationRegex.test(state)){
+        if(!!state && validationRegex.test(state)){
             return state
         }
         throw "State parameter failed validation regex. Should be 64 digit hex number."
     }
 
     code(this: AuthHandleUrlParams) : string{
-        return encodeURIComponent(this.searchParams.get("code"))
+        const code = this.searchParams.get("code")    
+        if(code!!){
+            return encodeURIComponent(code)
+        }
+        throw new Error("Could not get code")
     }
 }
 
@@ -105,7 +111,7 @@ async function exchangeCodeForTokens(){
     localStorage.setItem("expiry_time", expiry_time.toString())
 }
 
-function calculateExpiry(expiresInSeconds){
+function calculateExpiry(expiresInSeconds: number){
     const nowInMilis = Date.now()
     const expiresInMilis = expiresInSeconds*1000
     return nowInMilis + expiresInMilis

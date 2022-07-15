@@ -4,10 +4,14 @@ declare var env:envType
 
 if (self === top) {
     var frameBreaker = document.getElementById("frameBreaker");
-    frameBreaker.parentNode.removeChild(frameBreaker);
-    document.addEventListener("DOMContentLoaded", handleLogoutResponse);
+    if(!!frameBreaker?.parentNode){
+        frameBreaker.parentNode.removeChild(frameBreaker);
+        document.addEventListener("DOMContentLoaded", handleLogoutResponse);
+    }
 } else {
-    top.location = self.location;
+    if(!!top){
+        top.location = self.location;
+    }    
 }
 
 const yipFrontOrigin = env.yipFrontOrigin

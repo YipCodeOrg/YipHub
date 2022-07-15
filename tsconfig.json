@@ -2,7 +2,16 @@
     "compilerOptions": {
       "outDir": "./build",
       "allowJs": false,
-      "target": "ES2022"
+      "target": "ES2022",
+      "noImplicitAny": true,
+      "noUnusedLocals": true,
+      "noUnusedParameters": true,
+      "noUncheckedIndexedAccess": true,
+      "strict": true,
+      "noPropertyAccessFromIndexSignature": true,
+      "noImplicitReturns": true,
+      "noFallthroughCasesInSwitch": true,
+      "exactOptionalPropertyTypes": true
     },
     "include": ["./src/**/*"]
 }

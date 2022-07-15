@@ -5,10 +5,14 @@ declare var env:envType
 
 if (self === top) {
     var frameBreaker = document.getElementById("frameBreaker");
-    frameBreaker.parentNode.removeChild(frameBreaker);
-    document.addEventListener("DOMContentLoaded", initiatePkceFlow);
+    if(!!frameBreaker?.parentNode){
+        frameBreaker.parentNode.removeChild(frameBreaker);
+        document.addEventListener("DOMContentLoaded", initiatePkceFlow);
+    }
 } else {
-    top.location = self.location;
+    if(!!top){
+        top.location = self.location;
+    }    
 }
 
 class AuthInitUrlParams {
@@ -20,7 +24,7 @@ class AuthInitUrlParams {
 
     postLoginRedirect(this: AuthInitUrlParams) : string{
         const rawUnsafe = this.searchParams.get("postLoginRedirect")
-        if (validFrontRedirects.includes(rawUnsafe)) {
+        if (rawUnsafe!! && validFrontRedirects.includes(rawUnsafe)) {
             return rawUnsafe
         }
         throw new Error(`Invalid redirect given: ${rawUnsafe}`)
@@ -29,7 +33,7 @@ class AuthInitUrlParams {
 
 const sanitizedUrlParams = new AuthInitUrlParams(new URLSearchParams(window.location.search))
 
-function setPostLoginRedirect(r){        
+function setPostLoginRedirect(r: string){        
     sessionStorage.setItem("postLoginRedirect", r)
 }
 
@@ -56,7 +60,7 @@ async function generateVerifierReturnChallenge(){
     return base64URLEncode(await sha256(code_verifier))                 
 }  
 
-const sha256 = async (str) => { 
+const sha256 = async (str: string) => { 
     const encoded = new TextEncoder().encode(str)
     return await crypto.subtle.digest("SHA-256", encoded); 
 };
@@ -72,7 +76,7 @@ const generateRandomHexString = async () => {
     return randomString; 
 }; 
 
-const base64URLEncode = (arrayBuffer) => { 
+const base64URLEncode = (arrayBuffer: ArrayBuffer) => { 
     const byteArray = new Uint8Array(arrayBuffer)
     const binaryByteString = String.fromCharCode(...byteArray)
     const asciiBase64String = btoa(binaryByteString)
