@@ -3,7 +3,6 @@
       "outDir": "./build",
       "allowJs": false,
       "target": "ES2022",
-      "noImplicitAny": true,
       "noUnusedLocals": true,
       "noUnusedParameters": true,
       "noUncheckedIndexedAccess": true,
@@ -11,7 +10,8 @@
       "noPropertyAccessFromIndexSignature": true,
       "noImplicitReturns": true,
       "noFallthroughCasesInSwitch": true,
-      "exactOptionalPropertyTypes": true
+      "exactOptionalPropertyTypes": true,
+      "forceConsistentCasingInFileNames": true,
     },
     "include": ["./src/**/*"]
 }
