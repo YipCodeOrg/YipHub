@@ -1,17 +1,17 @@
 {
     "compilerOptions": {
-      "outDir": "./build",
       "allowJs": false,
-      "target": "ES2022",
-      "noUnusedLocals": true,
-      "noUnusedParameters": true,
-      "noUncheckedIndexedAccess": true,
-      "strict": true,
-      "noPropertyAccessFromIndexSignature": true,
-      "noImplicitReturns": true,
-      "noFallthroughCasesInSwitch": true,
       "exactOptionalPropertyTypes": true,
       "forceConsistentCasingInFileNames": true,
+      "noFallthroughCasesInSwitch": true,
+      "noImplicitReturns": true,
+      "noPropertyAccessFromIndexSignature": true,
+      "noUncheckedIndexedAccess": true,
+      "noUnusedLocals": true,
+      "noUnusedParameters": true,
+      "outDir": "./build",
+      "strict": true,
+      "target": "ES2022",
     },
     "include": ["./src/**/*"]
 }
