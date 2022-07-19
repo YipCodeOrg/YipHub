@@ -67,6 +67,10 @@ if [ $is_env_cached == false ]; then
             echo "Error: standard client not found"
             exit 1
         fi
+        if [[ $env = 'local' ]]; then
+            echo "Copying new env file to local cache"
+            cp $build_target_dir/env.js .local/
+        fi
     else
         echo "Error: user pool not found"
         exit 1
