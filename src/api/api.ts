@@ -209,6 +209,7 @@ function isFrontToHubMessage(obj: any): obj is FrontToHubMessage{
     }    
 }
 
+//Non-MVP: Validate the path too - safelist or regex
 function isValidApiRequestPayload(obj: any) : obj is ApiRequestPayload{
         
     let expectedStringProperties = ["method", "path"]
