@@ -191,6 +191,9 @@ type ApiRequestPayload = {
 }
 
 function isFrontToHubMessage(obj: any): obj is FrontToHubMessage{
+    if(!obj){
+        return false
+    }
     if(!isSimpleProperty(obj, "label")){
         return false
     }
@@ -211,6 +214,9 @@ function isFrontToHubMessage(obj: any): obj is FrontToHubMessage{
 
 //Non-MVP: Validate the path too - safelist or regex
 function isValidApiRequestPayload(obj: any) : obj is ApiRequestPayload{
+    if(!obj){
+        return false
+    }
         
     let expectedStringProperties = ["method", "path"]
     const bodyStr = "body"
@@ -288,5 +294,5 @@ function areStrings(objs: any[]){
 }
 
 function isString(obj: any){
-    return (typeof obj === 'string' || obj instanceof String)
+    return (!!obj && (typeof obj === 'string' || obj instanceof String))
 }
