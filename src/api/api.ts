@@ -223,12 +223,8 @@ function isValidApiRequestPayload(obj: any) : obj is ApiRequestPayload{
     if(isProperty(obj, bodyStr)){
         expectedStringProperties.push(bodyStr)
     }
-    if(!areSimpleProperties(obj, expectedStringProperties)){
-        console.error("Invalid API request: some expected simple properties not found")
-        return false
-    }
-    if(!areStrings(expectedStringProperties)){
-        console.error("Invalid API request: some properties are not strings")
+    if(!areSimpleStringProperties(obj, expectedStringProperties)){
+        console.error("Invalid API request: some expected simple string properties not found")
         return false
     }
     if(!allowedMethods.includes(obj.method)){
@@ -255,13 +251,12 @@ function extractApiRequestPayload(payload: ApiRequestPayload) : ApiRequestPayloa
     }
 }
 
-function areSimpleProperties(obj: any, properties: PropertyKey[]){
-    for(const prop of properties){
-        if(!isSimpleProperty(obj, prop)){
-            return false
-        }
-    }
-    return true
+function isSimpleStringProperty(obj: any, property: PropertyKey){
+    return isSimpleProperty(obj, property) && isString(obj[property])
+}
+
+function areSimpleStringProperties(obj: any, properties: PropertyKey[]){
+    return properties.every(prop => isSimpleStringProperty(obj, prop))
 }
 
 function isProperty(obj: any, property: PropertyKey){
@@ -280,15 +275,6 @@ function isSimplePropertyOrNonProperty(obj: any, property: PropertyKey){
     const desc = Object.getOwnPropertyDescriptor(obj, property)
     if(!!desc){
         return (!desc.get && !desc.set)
-    }
-    return true
-}
-
-function areStrings(objs: any[]){
-    for(const obj of objs){
-        if(!isString(obj)){
-            return false
-        }
     }
     return true
 }
